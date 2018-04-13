@@ -70,6 +70,10 @@ class Owncloud {
 	 * @param string conditionalLogFile
 	 */
 	public static function write($app, $message, $level, $conditionalLogFile = null) {
+		return self::writeExtra($app, $message, $level, $conditionalLogFile, []);
+	}
+
+	public static function writeExtra($app, $message, $level, $conditionalLogFile, $extraFields = []) {
 		$config = \OC::$server->getSystemConfig();
 
 		// default to ISO8601
@@ -110,8 +114,14 @@ class Owncloud {
 			'url',
 			'message'
 		);
+
+		if (!\empty($extraFields)) {
+			// augment with additional fields
+			$entry = \array_merge($entry, $extraFields);
+		}
+
 		$entry = \json_encode($entry);
-		if (!\is_null($conditionalLogFile)) {
+		if ($conditionalLogFile !== null) {
 			if ($conditionalLogFile[0] !== '/') {
 				$conditionalLogFile = \OC::$server->getConfig()->getSystemValue('datadirectory') . "/" . $conditionalLogFile;
 			}
