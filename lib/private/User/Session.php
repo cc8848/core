@@ -326,6 +326,7 @@ class Session implements IUserSession, Emitter {
 	 * @param string $user
 	 * @param string $password
 	 * @param IRequest $request
+	 * @throws \Exception
 	 * @throws \InvalidArgumentException
 	 * @throws LoginException
 	 * @throws PasswordLoginForbiddenException
@@ -455,6 +456,7 @@ class Session implements IUserSession, Emitter {
 	 * @todo do not allow basic auth if the user is 2FA enforced
 	 * @param IRequest $request
 	 * @return boolean if the login was successful
+	 * @throws LoginException
 	 */
 	public function tryBasicAuthLogin(IRequest $request) {
 		if (!empty($request->server['PHP_AUTH_USER']) && !empty($request->server['PHP_AUTH_PW'])) {
@@ -796,6 +798,7 @@ class Session implements IUserSession, Emitter {
 	 * @param IRequest $request
 	 * @todo check remember me cookie
 	 * @return boolean
+	 * @throws LoginException
 	 */
 	public function tryTokenLogin(IRequest $request) {
 		$authHeader = $request->getHeader('Authorization');
