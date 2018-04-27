@@ -391,7 +391,11 @@ class Encryption extends Wrapper {
 
 			$size = $unencryptedSize = 0;
 			$realFile = $this->util->stripPartialFileExtension($path);
-			$targetExists = $this->file_exists($realFile) || $this->file_exists($path);
+			$targetExists = false;
+			if ($this->file_exists($realFile) || ($realFile != $path && $this->file_exists($path))) {
+				// Original file exists, or part file exists
+				$targetExists = true;
+			}
 			$targetIsEncrypted = false;
 			if ($targetExists) {
 				// in case the file exists we require the explicit module as
@@ -887,18 +891,26 @@ class Encryption extends Wrapper {
 	}
 
 	/**
-	 * read first block of encrypted file, typically this will contain the
+	 * Read first block of encrypted file from resource, typically this will contain the
 	 * encryption header
 	 *
 	 * @param string|resource $path
 	 * @return string
 	 */
-	protected function readFirstBlock($path) {
-		if (\is_resource($path)) {
-			$firstBlock = \fread($path, $this->util->getHeaderSize());
-			\rewind($path);
-			return $firstBlock;
-		}
+	protected function readResourceFirstBlock($path) {
+		$firstBlock = \fread($path, $this->util->getHeaderSize());
+		\rewind($path);
+		return $firstBlock;
+	}
+
+	/**
+	 * Read first block of encrypted file from the storage, typically this will contain the
+	 * encryption header
+	 *
+	 * @param string|resource $path
+	 * @return string
+	 */
+	protected function readStorageFirstBlock($path) {
 		$firstBlock = '';
 		if ($this->storage->file_exists($path)) {
 			$handle = $this->storage->fopen($path, 'r');
@@ -916,13 +928,22 @@ class Encryption extends Wrapper {
 	 */
 	protected function getHeaderSize($path) {
 		$headerSize = 0;
-		if (!\is_resource($path)) {
+		if (\is_resource($path)) {
+			// It is resource under the path, read directly resource from block
+			$firstBlock = $this->readResourceFirstBlock($path);
+		} else {
 			$realFile = $this->util->stripPartialFileExtension($path);
 			if ($this->storage->file_exists($realFile)) {
-				$path = $realFile;
+				// Original file pointed by part file exists in the storage
+				$firstBlock = $this->readStorageFirstBlock($realFile);
+			} else if ($realFile != $path && $this->storage->file_exists($path)) {
+				// Original file does not exists, lets check part file
+				$firstBlock = $this->readStorageFirstBlock($path);
+			} else{
+				// No file under the path, return empty
+				$firstBlock = '';
 			}
 		}
-		$firstBlock = $this->readFirstBlock($path);
 
 		if (\substr($firstBlock, 0, \strlen(Util::HEADER_START)) === Util::HEADER_START) {
 			$headerSize = $this->util->getHeaderSize();
@@ -966,17 +987,27 @@ class Encryption extends Wrapper {
 	 * @return array
 	 */
 	protected function getHeader($path) {
+		$filecacheExists = false;
 		if (\is_resource($path)) {
-			$exists = false;
+			// It is resource under the path, read directly resource from block
+			$firstBlock = $this->readResourceFirstBlock($path);
 		} else {
 			$realFile = $this->util->stripPartialFileExtension($path);
-			$exists = $this->storage->file_exists($realFile);
-			if ($exists) {
+			if ($this->storage->file_exists($realFile)) {
+				// Original file pointed by part file exists in the storage,
+				// and thus filecache for this file also exists
+				$firstBlock = $this->readStorageFirstBlock($realFile);
+				$filecacheExists = true;
 				$path = $realFile;
+			} else if ($realFile != $path && $this->storage->file_exists($path)) {
+				// Original file does not exists, lets check part file
+				$firstBlock = $this->readStorageFirstBlock($path);
+			} else{
+				// No file under the path, return empty
+				$firstBlock = '';
 			}
 		}
 
-		$firstBlock = $this->readFirstBlock($path);
 		$result = $this->parseRawHeader($firstBlock);
 
 		// if the header doesn't contain a encryption module we check if it is a
@@ -984,7 +1015,7 @@ class Encryption extends Wrapper {
 		if (!isset($result[Util::HEADER_ENCRYPTION_MODULE_KEY])) {
 			if (!empty($result)) {
 				$result[Util::HEADER_ENCRYPTION_MODULE_KEY] = 'OC_DEFAULT_MODULE';
-			} else if ($exists) {
+			} else if ($filecacheExists) {
 				// if the header was empty we have to check first if it is a encrypted file at all
 				// We would do query to filecache only if we know that entry in filecache exists
 				$info = $this->getCache()->get($path);
