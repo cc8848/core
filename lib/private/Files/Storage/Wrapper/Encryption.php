@@ -911,12 +911,9 @@ class Encryption extends Wrapper {
 	 * @return string
 	 */
 	protected function readStorageFirstBlock($path) {
-		$firstBlock = '';
-		if ($this->storage->file_exists($path)) {
-			$handle = $this->storage->fopen($path, 'r');
-			$firstBlock = \fread($handle, $this->util->getHeaderSize());
-			\fclose($handle);
-		}
+		$handle = $this->storage->fopen($path, 'r');
+		$firstBlock = \fread($handle, $this->util->getHeaderSize());
+		\fclose($handle);
 		return $firstBlock;
 	}
 
