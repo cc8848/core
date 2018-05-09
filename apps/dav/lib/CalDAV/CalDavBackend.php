@@ -26,6 +26,7 @@ namespace OCA\DAV\CalDAV;
 
 use Doctrine\DBAL\Connection;
 use OCA\DAV\Connector\Sabre\Principal;
+use OCA\DAV\DAV\GroupPrincipalBackend;
 use OCA\DAV\DAV\Sharing\Backend;
 use OCA\DAV\DAV\Sharing\IShareable;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -65,12 +66,12 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * in 2038-01-19 to avoid problems when the date is converted
 	 * to a unix timestamp.
 	 */
-	const MAX_DATE = '2038-01-01';
+	public const MAX_DATE = '2038-01-01';
 
-	const ACCESS_PUBLIC = 4;
-	const CLASSIFICATION_PUBLIC = 0;
-	const CLASSIFICATION_PRIVATE = 1;
-	const CLASSIFICATION_CONFIDENTIAL = 2;
+	public const ACCESS_PUBLIC = 4;
+	public const CLASSIFICATION_PUBLIC = 0;
+	public const CLASSIFICATION_PRIVATE = 1;
+	public const CLASSIFICATION_CONFIDENTIAL = 2;
 
 	/**
 	 * List of CalDAV properties, and how they map to database field names
@@ -112,11 +113,9 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	/** @var Principal */
 	private $principalBackend;
 
-	/** @var IConfig */
-	private $config;
-
 	/** @var ISecureRandom */
 	private $random;
+
 	/** @var bool */
 	private $legacyMode;
 
@@ -125,19 +124,18 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 *
 	 * @param IDBConnection $db
 	 * @param Principal $principalBackend
-	 * @param IConfig $config
+	 * @param GroupPrincipalBackend $groupPrincipalBackend
 	 * @param ISecureRandom $random
 	 * @param bool $legacyMode
 	 */
 	public function __construct(IDBConnection $db,
 								Principal $principalBackend,
-								IConfig $config,
+								GroupPrincipalBackend $groupPrincipalBackend,
 								ISecureRandom $random,
 								$legacyMode = false) {
 		$this->db = $db;
 		$this->principalBackend = $principalBackend;
-		$this->sharingBackend = new Backend($this->db, $principalBackend, 'calendar');
-		$this->config = $config;
+		$this->sharingBackend = new Backend($this->db, $principalBackend, $groupPrincipalBackend, 'calendar');
 		$this->random = $random;
 		$this->legacyMode = $legacyMode;
 	}
@@ -168,7 +166,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @return array
 	 * @throws DAV\Exception
 	 */
-	function getCalendarsForUser($principalUri) {
+	public function getCalendarsForUser($principalUri) {
 		$principalUriOriginal = $principalUri;
 		$principalUri = $this->convertPrincipal($principalUri, true);
 		$fields = \array_values($this->propertyMap);
@@ -539,7 +537,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @return int
 	 * @throws DAV\Exception
 	 */
-	function createCalendar($principalUri, $calendarUri, array $properties) {
+	public function createCalendar($principalUri, $calendarUri, array $properties) {
 		$principalUri = $this->convertPrincipal($principalUri, true);
 		$values = [
 			'principaluri' => $principalUri,
@@ -594,7 +592,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param PropPatch $propPatch
 	 * @return void
 	 */
-	function updateCalendar($calendarId, PropPatch $propPatch) {
+	public function updateCalendar($calendarId, PropPatch $propPatch) {
 		$supportedProperties = \array_keys($this->propertyMap);
 		$supportedProperties[] = '{' . Plugin::NS_CALDAV . '}schedule-calendar-transp';
 
@@ -634,7 +632,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param mixed $calendarId
 	 * @return void
 	 */
-	function deleteCalendar($calendarId) {
+	public function deleteCalendar($calendarId) {
 		$stmt = $this->db->prepare('DELETE FROM `*PREFIX*calendarobjects` WHERE `calendarid` = ?');
 		$stmt->execute([$calendarId]);
 
@@ -653,7 +651,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param string $principalUri
 	 * @return void
 	 */
-	function deleteAllSharesForUser($principalUri) {
+	public function deleteAllSharesForUser($principalUri) {
 		$this->sharingBackend->deleteAllSharesByUser($principalUri);
 	}
 
@@ -688,7 +686,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param mixed $calendarId
 	 * @return array
 	 */
-	function getCalendarObjects($calendarId) {
+	public function getCalendarObjects($calendarId) {
 		$query = $this->db->getQueryBuilder();
 		$query->select(['id', 'uri', 'lastmodified', 'etag', 'calendarid', 'size', 'componenttype', 'classification'])
 			->from('calendarobjects')
@@ -728,7 +726,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param string $objectUri
 	 * @return array|null
 	 */
-	function getCalendarObject($calendarId, $objectUri) {
+	public function getCalendarObject($calendarId, $objectUri) {
 
 		$query = $this->db->getQueryBuilder();
 		$query->select(['id', 'uri', 'lastmodified', 'etag', 'calendarid', 'size', 'calendardata', 'componenttype', 'classification'])
@@ -767,7 +765,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param string[] $uris
 	 * @return array
 	 */
-	function getMultipleCalendarObjects($calendarId, array $uris) {
+	public function getMultipleCalendarObjects($calendarId, array $uris) {
 		$chunkSize = 998;
 		if (\count($uris) <= $chunkSize) {
 			$query = $this->db->getQueryBuilder();
@@ -824,8 +822,10 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param string $calendarData
 	 * @return string
 	 * @throws DAV\Exception\BadRequest
+	 * @throws \Sabre\VObject\Recur\MaxInstancesExceededException
+	 * @throws \Sabre\VObject\Recur\NoInstancesException
 	 */
-	function createCalendarObject($calendarId, $objectUri, $calendarData) {
+	public function createCalendarObject($calendarId, $objectUri, $calendarData) {
 		$extraData = $this->getDenormalizedData($calendarData);
 
 		$query = $this->db->getQueryBuilder();
@@ -868,8 +868,10 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param string $calendarData
 	 * @return string
 	 * @throws DAV\Exception\BadRequest
+	 * @throws \Sabre\VObject\Recur\MaxInstancesExceededException
+	 * @throws \Sabre\VObject\Recur\NoInstancesException
 	 */
-	function updateCalendarObject($calendarId, $objectUri, $calendarData) {
+	public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
 		$extraData = $this->getDenormalizedData($calendarData);
 
 		$query = $this->db->getQueryBuilder();
@@ -899,7 +901,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	public function setClassification($calendarObjectId, $classification) {
 		if (!\in_array($classification, [
 			self::CLASSIFICATION_PUBLIC, self::CLASSIFICATION_PRIVATE, self::CLASSIFICATION_CONFIDENTIAL
-		])) {
+		], true)) {
 			throw new \InvalidArgumentException();
 		}
 		$query = $this->db->getQueryBuilder();
@@ -918,7 +920,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param string $objectUri
 	 * @return void
 	 */
-	function deleteCalendarObject($calendarId, $objectUri) {
+	public function deleteCalendarObject($calendarId, $objectUri) {
 		$stmt = $this->db->prepare('DELETE FROM `*PREFIX*calendarobjects` WHERE `calendarid` = ? AND `uri` = ?');
 		$stmt->execute([$calendarId, $objectUri]);
 
@@ -974,7 +976,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param array $filters
 	 * @return array
 	 */
-	function calendarQuery($calendarId, array $filters) {
+	public function calendarQuery($calendarId, array $filters) {
 		$componentType = null;
 		$requirePostFilter = true;
 		$timeRange = null;
@@ -1058,7 +1060,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param string $uid
 	 * @return string|null
 	 */
-	function getCalendarObjectByUID($principalUri, $uid) {
+	public function getCalendarObjectByUID($principalUri, $uid) {
 
 		$query = $this->db->getQueryBuilder();
 		$query->selectAlias('c.uri', 'calendaruri')->selectAlias('co.uri', 'objecturi')
@@ -1132,7 +1134,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param int $limit
 	 * @return array
 	 */
-	function getChangesForCalendar($calendarId, $syncToken, $syncLevel, $limit = null) {
+	public function getChangesForCalendar($calendarId, $syncToken, $syncLevel, $limit = null) {
 		// Current synctoken
 		$stmt = $this->db->prepare('SELECT `synctoken` FROM `*PREFIX*calendars` WHERE `id` = ?');
 		$stmt->execute([ $calendarId ]);
@@ -1226,7 +1228,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param string $principalUri
 	 * @return array
 	 */
-	function getSubscriptionsForUser($principalUri) {
+	public function getSubscriptionsForUser($principalUri) {
 		$fields = \array_values($this->subscriptionPropertyMap);
 		$fields[] = 'id';
 		$fields[] = 'uri';
@@ -1279,7 +1281,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @return mixed
 	 * @throws Forbidden
 	 */
-	function createSubscription($principalUri, $uri, array $properties) {
+	public function createSubscription($principalUri, $uri, array $properties) {
 
 		if (!isset($properties['{http://calendarserver.org/ns/}source'])) {
 			throw new Forbidden('The {http://calendarserver.org/ns/}source property is required when creating subscriptions');
@@ -1297,7 +1299,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 		foreach($this->subscriptionPropertyMap as $xmlName=>$dbName) {
 			if (\array_key_exists($xmlName, $properties)) {
 					$values[$dbName] = $properties[$xmlName];
-					if (\in_array($dbName, $propertiesBoolean)) {
+					if (\in_array($dbName, $propertiesBoolean, true)) {
 						$values[$dbName] = true;
 				}
 			}
@@ -1334,7 +1336,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param PropPatch $propPatch
 	 * @return void
 	 */
-	function updateSubscription($subscriptionId, PropPatch $propPatch) {
+	public function updateSubscription($subscriptionId, PropPatch $propPatch) {
 		$supportedProperties = \array_keys($this->subscriptionPropertyMap);
 		$supportedProperties[] = '{http://calendarserver.org/ns/}source';
 
@@ -1371,7 +1373,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param mixed $subscriptionId
 	 * @return void
 	 */
-	function deleteSubscription($subscriptionId) {
+	public function deleteSubscription($subscriptionId) {
 		$query = $this->db->getQueryBuilder();
 		$query->delete('calendarsubscriptions')
 			->where($query->expr()->eq('id', $query->createNamedParameter($subscriptionId)))
@@ -1394,7 +1396,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param string $objectUri
 	 * @return array
 	 */
-	function getSchedulingObject($principalUri, $objectUri) {
+	public function getSchedulingObject($principalUri, $objectUri) {
 		$query = $this->db->getQueryBuilder();
 		$stmt = $query->select(['uri', 'calendardata', 'lastmodified', 'etag', 'size'])
 			->from('schedulingobjects')
@@ -1428,7 +1430,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param string $principalUri
 	 * @return array
 	 */
-	function getSchedulingObjects($principalUri) {
+	public function getSchedulingObjects($principalUri) {
 		$query = $this->db->getQueryBuilder();
 		$stmt = $query->select(['uri', 'calendardata', 'lastmodified', 'etag', 'size'])
 				->from('schedulingobjects')
@@ -1456,7 +1458,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param string $objectUri
 	 * @return void
 	 */
-	function deleteSchedulingObject($principalUri, $objectUri) {
+	public function deleteSchedulingObject($principalUri, $objectUri) {
 		$query = $this->db->getQueryBuilder();
 		$query->delete('schedulingobjects')
 				->where($query->expr()->eq('principaluri', $query->createNamedParameter($principalUri)))
@@ -1472,7 +1474,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param string $objectData
 	 * @return void
 	 */
-	function createSchedulingObject($principalUri, $objectUri, $objectData) {
+	public function createSchedulingObject($principalUri, $objectUri, $objectData) {
 		$query = $this->db->getQueryBuilder();
 		$query->insert('schedulingobjects')
 			->values([
@@ -1524,8 +1526,9 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 *
 	 * @param string $calendarData
 	 * @return array
-	 * @throws \Sabre\VObject\Recur\MaxInstancesExceededException
 	 * @throws DAV\Exception\BadRequest
+	 * @throws \Sabre\VObject\Recur\MaxInstancesExceededException
+	 * @throws \Sabre\VObject\Recur\NoInstancesException
 	 */
 	public function getDenormalizedData($calendarData) {
 
@@ -1544,7 +1547,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 			}
 		}
 		if (!$componentType) {
-			throw new \Sabre\DAV\Exception\BadRequest('Calendar objects must have a VJOURNAL, VEVENT or VTODO component');
+			throw new DAV\Exception\BadRequest('Calendar objects must have a VJOURNAL, VEVENT or VTODO component');
 		}
 		if ($componentType === 'VEVENT' && $component->DTSTART) {
 			$firstOccurrence = $component->DTSTART->getDateTime()->getTimeStamp();
