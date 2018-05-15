@@ -57,7 +57,7 @@ script:
 
 matrix:
   include:
-    - php: 7.1.17
+    - php: 7.2.5
       env: DB=pgsql TC=selenium BROWSER="chrome" BROWSER_VERSION="latest" BEHAT_SUITE="webUILogin" PLATFORM="Windows 10" TEST_DAV=0
       addons:
         apt: *common_apt
@@ -133,13 +133,13 @@ matrix:
         apt: *common_apt
         hosts: *common_hosts
         sauce_connect: true
-    - php: 7.1.17
+    - php: 7.2.5
       env: DB=pgsql TC=selenium BROWSER="chrome" BROWSER_VERSION="latest" BEHAT_SUITE="webUIRestrictSharing" PLATFORM="Windows 10" TEST_DAV=0
       addons:
         apt: *common_apt
         hosts: *common_hosts
         sauce_connect: true
-    - php: 7.1.17
+    - php: 7.2.5
       env: DB=pgsql TC=selenium BROWSER="chrome" BROWSER_VERSION="latest" BEHAT_SUITE="webUIUpload" PLATFORM="Windows 10" TEST_DAV=0
       addons:
         apt: *common_apt
