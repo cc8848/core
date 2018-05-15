@@ -28,6 +28,7 @@ branches:
 
 addons:
   apt: &common_apt
+    update: true
     packages:
     - realpath
     - net-tools
