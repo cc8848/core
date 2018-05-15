@@ -176,12 +176,12 @@ class PreviewManager implements IPreview {
 	 *
 	 * @return string[]
 	 */
-	public function getSupportedMimes(){
+	public function getSupportedMimes() {
 		$supportedMimes = [];
 		$this->registerCoreProviders();
 		$mimeRegexArray = \array_keys($this->providers);
 		// Now trim start/stop regexp delimiters
-		foreach ($mimeRegexArray as $mimeRegex){
+		foreach ($mimeRegexArray as $mimeRegex) {
 			$supportedMimes[] = \trim($mimeRegex, '/');
 		}
 		return $supportedMimes;
@@ -204,7 +204,7 @@ class PreviewManager implements IPreview {
 		}
 
 		$mount = $file->getMountPoint();
-		if ($mount and !$mount->getOption('previews', true)){
+		if ($mount and !$mount->getOption('previews', true)) {
 			return false;
 		}
 
@@ -370,7 +370,7 @@ class PreviewManager implements IPreview {
 		// Video requires avconv or ffmpeg and is therefor
 		// currently not supported on Windows.
 		if (\in_array('OC\Preview\Movie', $this->getEnabledDefaultProvider())) {
-		// AtomicParsley would actually work under Windows.
+			// AtomicParsley would actually work under Windows.
 			$avconvBinary = \OC_Helper::findBinaryPath('avconv');
 			$ffmpegBinary = ($avconvBinary) ? null : \OC_Helper::findBinaryPath('ffmpeg');
 			$atomicParsleyBinary = \OC_Helper::findBinaryPath('AtomicParsley');

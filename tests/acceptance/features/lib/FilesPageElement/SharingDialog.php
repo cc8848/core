@@ -66,7 +66,7 @@ class SharingDialog extends OwncloudPage {
 	 */
 	private function _findShareWithField() {
 		$shareWithField = $this->find("xpath", $this->shareWithFieldXpath);
-		if (\is_null($shareWithField)) {
+		if (null === $shareWithField) {
 			throw new ElementNotFoundException(
 				__METHOD__ .
 				" xpath $this->shareWithFieldXpath could not find share-with-field"
@@ -104,7 +104,7 @@ class SharingDialog extends OwncloudPage {
 			"xpath",
 			$this->shareWithAutocompleteListXpath
 		);
-		if (\is_null($autocompleteNodeElement)) {
+		if (null === $autocompleteNodeElement) {
 			throw new ElementNotFoundException(
 				__METHOD__ .
 				" xpath $this->shareWithAutocompleteListXpath " .
@@ -268,7 +268,7 @@ class SharingDialog extends OwncloudPage {
 	) {
 		$xpathLocator = \sprintf($this->permissionsFieldByUserName, $shareReceiverName);
 		$permissionsField = $this->find("xpath", $xpathLocator);
-		if (\is_null($permissionsField)) {
+		if (null === $permissionsField) {
 			throw new ElementNotFoundException(
 				__METHOD__
 				. " xpath $xpathLocator could not find share permissions field for user "
@@ -276,7 +276,7 @@ class SharingDialog extends OwncloudPage {
 			);
 		}
 		$showCrudsBtn = $permissionsField->find("xpath", $this->showCrudsXpath);
-		if (\is_null($showCrudsBtn)) {
+		if (null === $showCrudsBtn) {
 			throw new ElementNotFoundException(
 				__METHOD__
 				. " xpath $this->showCrudsXpath could not find show-cruds button for user "
@@ -295,7 +295,7 @@ class SharingDialog extends OwncloudPage {
 			//so we first find the checkbox, then get its id and find the label
 			//that is associated with that id, that label is finally what we click
 			$permissionCheckBox = $permissionsField->findField($permission);
-			if (\is_null($permissionCheckBox)) {
+			if (null === $permissionCheckBox) {
 				throw new ElementNotFoundException(
 					__METHOD__ .
 					"could not find the permission check box for permission " .
@@ -303,7 +303,7 @@ class SharingDialog extends OwncloudPage {
 				);
 			}
 			$checkBoxId = $permissionCheckBox->getAttribute("id");
-			if (\is_null($checkBoxId)) {
+			if (null === $checkBoxId) {
 				throw new ElementNotFoundException(
 					__METHOD__ .
 					"could not find the id of the permission check box of " .
@@ -314,7 +314,7 @@ class SharingDialog extends OwncloudPage {
 			$xpathLocator = \sprintf($this->permissionLabelXpath, $checkBoxId);
 			$permissionLabel = $permissionsField->find("xpath", $xpathLocator);
 
-			if (\is_null($permissionLabel)) {
+			if (null === $permissionLabel) {
 				throw new ElementNotFoundException(
 					__METHOD__ .
 					" xpath $xpathLocator " .
@@ -342,7 +342,7 @@ class SharingDialog extends OwncloudPage {
 		$shareWithTooltip = $shareWithField->find(
 			"xpath", $this->shareWithTooltipXpath
 		);
-		if (\is_null($shareWithTooltip)) {
+		if (null === $shareWithTooltip) {
 			throw new ElementNotFoundException(
 				__METHOD__ .
 				" xpath $this->shareWithTooltipXpath " .
@@ -361,7 +361,7 @@ class SharingDialog extends OwncloudPage {
 	 */
 	public function findSharerInformationItem() {
 		$sharerInformation = $this->find("xpath", $this->sharerInformationXpath);
-		if (\is_null($sharerInformation)) {
+		if (null === $sharerInformation) {
 			throw new ElementNotFoundException(
 				__METHOD__ .
 				" xpath $this->sharerInformationXpath " .
@@ -379,7 +379,7 @@ class SharingDialog extends OwncloudPage {
 	 * @return array ["sharedWithGroup" => string, "sharer" => string]
 	 */
 	public function getSharedWithGroupAndSharerName() {
-		if (\is_null($this->sharedWithGroupAndSharerName)) {
+		if (null === $this->sharedWithGroupAndSharerName) {
 			$text = $this->getTrimmedText($this->findSharerInformationItem());
 			if (\preg_match("/" . $this->sharedWithAndByRegEx . "/", $text, $matches)) {
 				$this->sharedWithGroupAndSharerName = [
@@ -422,7 +422,7 @@ class SharingDialog extends OwncloudPage {
 	 */
 	public function findThumbnailContainer() {
 		$thumbnailContainer = $this->find("xpath", $this->thumbnailContainerXpath);
-		if (\is_null($thumbnailContainer)) {
+		if (null === $thumbnailContainer) {
 			throw new ElementNotFoundException(
 				__METHOD__ .
 				" xpath $this->thumbnailContainerXpath " .
@@ -442,7 +442,7 @@ class SharingDialog extends OwncloudPage {
 		$thumbnail = $thumbnailContainer->find(
 			"xpath", $this->thumbnailFromContainerXpath
 		);
-		if (\is_null($thumbnail)) {
+		if (null === $thumbnail) {
 			throw new ElementNotFoundException(
 				__METHOD__ .
 				" xpath $this->thumbnailFromContainerXpath " .
@@ -453,13 +453,13 @@ class SharingDialog extends OwncloudPage {
 	}
 
 	/**
-	 * 
+	 *
 	 * @throws ElementNotFoundException
 	 * @return PublicLinkTab
 	 */
 	public function openPublicShareTab() {
 		$publicShareTabLink = $this->find("xpath", $this->publicShareTabLinkXpath);
-		if (\is_null($publicShareTabLink)) {
+		if (null === $publicShareTabLink) {
 			throw new ElementNotFoundException(
 				__METHOD__ .
 				" xpath $this->publicShareTabLinkXpath " .
@@ -482,7 +482,7 @@ class SharingDialog extends OwncloudPage {
 	 */
 	public function closeSharingDialog() {
 		$shareDialogCloseButton = $this->find("xpath", $this->shareWithCloseXpath);
-		if (\is_null($shareDialogCloseButton)) {
+		if (null === $shareDialogCloseButton) {
 			throw new ElementNotFoundException(
 				__METHOD__ .
 				" xpath $this->shareWithCloseXpath " .

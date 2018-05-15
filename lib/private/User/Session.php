@@ -85,7 +85,6 @@ use Symfony\Component\EventDispatcher\GenericEvent;
  * @package OC\User
  */
 class Session implements IUserSession, Emitter {
-
 	use EventEmitterTrait;
 	/** @var IUserManager | PublicEmitter $manager */
 	private $manager;
@@ -352,7 +351,7 @@ class Session implements IUserSession, Emitter {
 
 		if ($isTokenPassword) {
 			$this->session->set('app_password', $password);
-		} else if($this->supportsCookies($request)) {
+		} elseif ($this->supportsCookies($request)) {
 			// Password login, but cookies supported -> create (browser) session token
 			$this->createSessionToken($request, $this->getUser()->getUID(), $user, $password);
 		}
@@ -439,7 +438,7 @@ class Session implements IUserSession, Emitter {
 				$this->logger->warning(
 					'Skeleton not created due to missing read permission in skeleton directory'
 				);
-			} catch(HintException $hintEx) {
+			} catch (HintException $hintEx) {
 				// only if Skeleton no existing Dir
 				$this->logger->error($hintEx->getMessage());
 			}
@@ -584,7 +583,6 @@ class Session implements IUserSession, Emitter {
 	 * @throws LoginException
 	 */
 	public function loginWithApache(IApacheBackend $apacheBackend) {
-
 		$uidAndBackend = $apacheBackend->getCurrentUserId();
 		if (\is_array($uidAndBackend)
 			&& \count($uidAndBackend) === 2
@@ -593,7 +591,7 @@ class Session implements IUserSession, Emitter {
 			&& $uidAndBackend[1] instanceof UserInterface
 		) {
 			list($uid, $backend) = $uidAndBackend;
-		} else if (\is_string($uidAndBackend)) {
+		} elseif (\is_string($uidAndBackend)) {
 			$uid = $uidAndBackend;
 			if ($apacheBackend instanceof UserInterface) {
 				$backend = $apacheBackend;
@@ -614,7 +612,7 @@ class Session implements IUserSession, Emitter {
 		$this->manager->emit('\OC\User', 'preLogin', [$uid, '']);
 
 		// Die here if not valid
-		if(!$apacheBackend->isSessionActive()) {
+		if (!$apacheBackend->isSessionActive()) {
 			return false;
 		}
 
@@ -813,7 +811,7 @@ class Session implements IUserSession, Emitter {
 		if (!$this->loginWithToken($token)) {
 			return false;
 		}
-		if(!$this->validateToken($token)) {
+		if (!$this->validateToken($token)) {
 			return false;
 		}
 		return true;
@@ -935,7 +933,6 @@ class Session implements IUserSession, Emitter {
 				try {
 					$this->tokenProvider->invalidateToken($this->session->getId());
 				} catch (SessionNotAvailableException $ex) {
-
 				}
 			}
 			$this->setUser(null);
@@ -1015,7 +1012,6 @@ class Session implements IUserSession, Emitter {
 					$lastUser = $user;
 				}
 			}
-
 		} catch (Exception $ex) {
 			$shallLogout = true;
 		}

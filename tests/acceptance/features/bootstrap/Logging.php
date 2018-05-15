@@ -27,7 +27,6 @@ use TestHelpers\LoggingHelper;
  * Logging trait
  */
 trait Logging {
-
 	private $oldLogLevel = null;
 	private $oldLogBackend = null;
 	private $oldLogTimezone = null;
@@ -192,17 +191,17 @@ trait Logging {
 	 * @return void
 	 */
 	public function tearDownScenarioLogging() {
-		if (!\is_null($this->oldLogLevel)
+		if (null !== $this->oldLogLevel
 			&& $this->oldLogLevel !== LoggingHelper::getLogLevel()
 		) {
 			LoggingHelper::setLogLevel($this->oldLogLevel);
 		}
-		if (!\is_null($this->oldLogBackend)
+		if (null !== $this->oldLogBackend
 			&& $this->oldLogBackend !== LoggingHelper::getLogBackend()
 		) {
 			LoggingHelper::setLogBackend($this->oldLogBackend);
 		}
-		if (!\is_null($this->oldLogTimezone)
+		if (null !== $this->oldLogTimezone
 			&& $this->oldLogTimezone !== LoggingHelper::getLogTimezone()
 		) {
 			LoggingHelper::setLogTimezone($this->oldLogTimezone);

@@ -40,7 +40,7 @@ class SettingsMenu extends OwncloudPage {
 	 */
 	public function logout() {
 		$logoutButton = $this->findById($this->logoutButtonId);
-		if (\is_null($logoutButton)) {
+		if (null === $logoutButton) {
 			throw new ElementNotFoundException(
 				__METHOD__ .
 				" id $this->logoutButtonId " .
@@ -50,4 +50,3 @@ class SettingsMenu extends OwncloudPage {
 		$logoutButton->click();
 	}
 }
-	

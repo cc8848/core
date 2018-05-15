@@ -77,16 +77,16 @@ class MountPoint implements IMountPoint {
 	 * @param array $mountOptions mount specific options
 	 */
 	public function __construct($storage, $mountpoint, $arguments = null, $loader = null, $mountOptions = null) {
-		if (\is_null($arguments)) {
+		if (null === $arguments) {
 			$arguments = [];
 		}
-		if (\is_null($loader)) {
+		if (null === $loader) {
 			$this->loader = new StorageFactory();
 		} else {
 			$this->loader = $loader;
 		}
 
-		if (!\is_null($mountOptions)) {
+		if (null !== $mountOptions) {
 			$this->mountOptions = $mountOptions;
 		}
 
@@ -158,7 +158,7 @@ class MountPoint implements IMountPoint {
 	 * @return \OC\Files\Storage\Storage
 	 */
 	public function getStorage() {
-		if (\is_null($this->storage)) {
+		if (null === $this->storage) {
 			$this->storage = $this->createStorage();
 		}
 		return $this->storage;
@@ -169,9 +169,9 @@ class MountPoint implements IMountPoint {
 	 */
 	public function getStorageId() {
 		if (!$this->storageId) {
-			if (\is_null($this->storage)) {
+			if (null === $this->storage) {
 				$storage = $this->createStorage(); //FIXME: start using exceptions
-				if (\is_null($storage)) {
+				if (null === $storage) {
 					return null;
 				}
 

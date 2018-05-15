@@ -157,7 +157,6 @@ class Movie implements IProvider2 {
 	 * @return bool|\OCP\IImage
 	 */
 	private function generateThumbNail($maxX, $maxY, $absPath, $second) {
-
 		$extractedCover = $this->extractMp4CoverArtwork($absPath);
 		if (false !== $extractedCover) {
 			$tmpPath = $extractedCover;

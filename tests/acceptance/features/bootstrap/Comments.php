@@ -30,11 +30,11 @@ require __DIR__ . '/../../../../lib/composer/autoload.php';
 trait Comments {
 
 	/**
-	 * @var int 
+	 * @var int
 	 */
 	private $lastCommentId;
 	/**
-	 * @var int 
+	 * @var int
 	 */
 	private $lastFileId;
 
@@ -278,5 +278,4 @@ trait Comments {
 			$user, $content, $this->lastFileId, $this->lastCommentId
 		);
 	}
-
 }

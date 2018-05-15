@@ -521,7 +521,6 @@ trait Sharing {
 		$permissions = null,
 		$linkName = null
 	) {
-
 		try {
 			$this->response = SharingHelper::createShare(
 				$this->getBaseUrl(),
@@ -572,13 +571,13 @@ trait Sharing {
 			return false;
 		} else {
 			if ($contentExpected == "A_TOKEN") {
-					return (\strlen((string)$data->$field) == 15);
+				return (\strlen((string)$data->$field) == 15);
 			} elseif ($contentExpected == "A_NUMBER") {
-					return \is_numeric((string)$data->$field);
+				return \is_numeric((string)$data->$field);
 			} elseif ($contentExpected == "AN_URL") {
-					return $this->isAPublicLinkUrl((string)$data->$field);
+				return $this->isAPublicLinkUrl((string)$data->$field);
 			} elseif ($data->$field == $contentExpected) {
-					return true;
+				return true;
 			}
 			return false;
 		}

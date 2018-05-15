@@ -65,7 +65,7 @@ class UploadHelper {
 	) {
 
 		//simple upload with no chunking
-		if (\is_null($chunkingVersion)) {
+		if (null === $chunkingVersion) {
 			$data = Stream::factory(\fopen($source, 'r'));
 			return WebDavHelper::makeDavRequest(
 				$baseUrl,

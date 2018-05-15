@@ -41,7 +41,7 @@ class DependencyAnalyzer {
 	 * @param Platform $platform
 	 * @param \OCP\IL10N $l
 	 */
-	function __construct(Platform $platform, IL10N $l) {
+	public function __construct(Platform $platform, IL10N $l) {
 		$this->platform = $platform;
 		$this->l = $l;
 	}
@@ -232,7 +232,7 @@ class DependencyAnalyzer {
 		foreach ($libs as $lib) {
 			$libName = $this->getValue($lib);
 			$libVersion = $this->platform->getLibraryVersion($libName);
-			if (\is_null($libVersion)) {
+			if (null === $libVersion) {
 				$missing[] = (string)$this->l->t('The library %s is not available.', $libName);
 				continue;
 			}
@@ -307,12 +307,12 @@ class DependencyAnalyzer {
 			$maxVersion = $appInfo['requiremax'];
 		}
 
-		if (!\is_null($minVersion)) {
+		if (null !== $minVersion) {
 			if ($this->compareSmaller($this->platform->getOcVersion(), $minVersion)) {
 				$missing[] = (string)$this->l->t('ownCloud %s or higher is required.', $minVersion);
 			}
 		}
-		if (!\is_null($maxVersion)) {
+		if (null !== $maxVersion) {
 			if ($this->compareBigger($this->platform->getOcVersion(), $maxVersion)) {
 				$missing[] = (string)$this->l->t('ownCloud %s or lower is required.', $maxVersion);
 			}
@@ -325,8 +325,9 @@ class DependencyAnalyzer {
 	 * @return mixed
 	 */
 	private function getValue($element) {
-		if (isset($element['@value']))
+		if (isset($element['@value'])) {
 			return $element['@value'];
+		}
 		return (string)$element;
 	}
 }
