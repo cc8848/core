@@ -37,6 +37,7 @@ addons:
     - owncloud
 
 before_install:
+  - sudo apt-get upgrade
   - make
   - sh -c "if [ '$TEST_DAV' = '1' ] || [ '$TC' = 'selenium' ]; then bash tests/travis/before_install.sh $DB; fi"
 
