@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "74c6b051591d10264c8f7011107d7e09",
+    "content-hash": "03859588655fee01099cb1a175b484f0",
     "packages": [
         {
             "name": "bantu/ini-get-wrapper",
@@ -4473,6 +4473,55 @@
                 "service proxies"
             ],
             "time": "2015-08-09T04:28:19+00:00"
+        },
+        {
+            "name": "owncloud/coding-standard",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/owncloud/coding-standard.git",
+                "reference": "c20e818734ebf29b671aa7e14c4466ca8699b040"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/owncloud/coding-standard/zipball/c20e818734ebf29b671aa7e14c4466ca8699b040",
+                "reference": "c20e818734ebf29b671aa7e14c4466ca8699b040",
+                "shasum": ""
+            },
+            "require": {
+                "friendsofphp/php-cs-fixer": "^2.11"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "OC\\CodingStandard\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "AGPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Thomas Müller",
+                    "email": "thomas.mueller@tmit.eu"
+                },
+                {
+                    "name": "Patrick Jahns",
+                    "email": "github@patrickjahns.de"
+                }
+            ],
+            "description": "ownCloud Coding Standard",
+            "homepage": "http://www.owncloud.org",
+            "keywords": [
+                "code",
+                "coding",
+                "owncloud",
+                "php-cs-fixer",
+                "standard",
+                "style"
+            ],
+            "time": "2018-05-15T15:54:16+00:00"
         },
         {
             "name": "php-cs-fixer/diff",
