@@ -27,7 +27,6 @@ use TestHelpers\LoggingHelper;
  * Logging trait
  */
 trait Logging {
-
 	private $oldLogLevel = null;
 	private $oldLogBackend = null;
 	private $oldLogTimezone = null;
@@ -50,15 +49,15 @@ trait Logging {
 		TableNode $expectedLogEntries
 	) {
 		//-1 because getRows gives also the header
-		$linesToRead = count($expectedLogEntries->getRows()) - 1;
+		$linesToRead = \count($expectedLogEntries->getRows()) - 1;
 		$logLines = LoggingHelper::tailFile(
 			LoggingHelper::getLogFilePath(),
 			$linesToRead
 		);
 		$lineNo = 0;
 		foreach ($expectedLogEntries as $expectedLogEntry) {
-			$logEntry = json_decode($logLines[$lineNo], true);
-			foreach (array_keys($expectedLogEntry) as $attribute) {
+			$logEntry = \json_decode($logLines[$lineNo], true);
+			foreach (\array_keys($expectedLogEntry) as $attribute) {
 				$expectedLogEntry [$attribute]
 					= $this->featureContext->substituteInLineCodes(
 						$expectedLogEntry [$attribute]
@@ -98,11 +97,11 @@ trait Logging {
 	public function theLogFileShouldNotContainAnyLogEntriesWithTheseAttributes(
 		TableNode $logEntriesExpectedNotToExist
 	) {
-		$logLines = file(LoggingHelper::getLogFilePath());
+		$logLines = \file(LoggingHelper::getLogFilePath());
 		foreach ($logLines as $logLine) {
-			$logEntries = json_decode($logLine, true);
+			$logEntries = \json_decode($logLine, true);
 			foreach ($logEntriesExpectedNotToExist as $logEntryExpectedNotToExist) {
-				foreach (array_keys($logEntryExpectedNotToExist) as $attribute) {
+				foreach (\array_keys($logEntryExpectedNotToExist) as $attribute) {
 					$logEntryExpectedNotToExist [$attribute]
 						= $this->featureContext->substituteInLineCodes(
 							$logEntryExpectedNotToExist [$attribute]
@@ -192,17 +191,17 @@ trait Logging {
 	 * @return void
 	 */
 	public function tearDownScenarioLogging() {
-		if (!is_null($this->oldLogLevel)
+		if (null !== $this->oldLogLevel
 			&& $this->oldLogLevel !== LoggingHelper::getLogLevel()
 		) {
 			LoggingHelper::setLogLevel($this->oldLogLevel);
 		}
-		if (!is_null($this->oldLogBackend)
+		if (null !== $this->oldLogBackend
 			&& $this->oldLogBackend !== LoggingHelper::getLogBackend()
 		) {
 			LoggingHelper::setLogBackend($this->oldLogBackend);
 		}
-		if (!is_null($this->oldLogTimezone)
+		if (null !== $this->oldLogTimezone
 			&& $this->oldLogTimezone !== LoggingHelper::getLogTimezone()
 		) {
 			LoggingHelper::setLogTimezone($this->oldLogTimezone);

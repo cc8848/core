@@ -39,7 +39,6 @@ use Sabre\DAV\INode;
  * @package OCA\DAV\DAV
  */
 class FileCustomPropertiesBackend extends AbstractCustomPropertiesBackend {
-
 	const SELECT_BY_ID_STMT = 'SELECT * FROM `*PREFIX*properties` WHERE `fileid` = ?';
 	const INSERT_BY_ID_STMT = 'INSERT INTO `*PREFIX*properties`'
 	. ' (`fileid`,`propertyname`,`propertyvalue`) VALUES(?,?,?)';
@@ -72,7 +71,7 @@ class FileCustomPropertiesBackend extends AbstractCustomPropertiesBackend {
 		}
 
 		$node = $this->getNodeForPath($path);
-		if (is_null($node)) {
+		if (null === $node) {
 			return;
 		}
 
@@ -101,7 +100,7 @@ class FileCustomPropertiesBackend extends AbstractCustomPropertiesBackend {
 	 */
 	protected function getProperties($path, INode $node, array $requestedProperties) {
 		$fileId = $node->getId();
-		if (is_null($this->offsetGet($fileId))) {
+		if (null === $this->offsetGet($fileId)) {
 			// TODO: chunking if more than 1000 properties
 			$sql = self::SELECT_BY_ID_STMT;
 			$whereValues = [$fileId];
@@ -133,9 +132,9 @@ class FileCustomPropertiesBackend extends AbstractCustomPropertiesBackend {
 		// TODO: use "insert or update" strategy ?
 		$this->connection->beginTransaction();
 		foreach ($changedProperties as $propertyName => $propertyValue) {
-			$propertyExists = array_key_exists($propertyName, $existingProperties);
+			$propertyExists = \array_key_exists($propertyName, $existingProperties);
 			// If it was null, we need to delete the property
-			if (is_null($propertyValue)) {
+			if (null === $propertyValue) {
 				if ($propertyExists) {
 					$this->connection->executeUpdate($deleteStatement,
 						[
@@ -181,12 +180,12 @@ class FileCustomPropertiesBackend extends AbstractCustomPropertiesBackend {
 	 */
 	protected function loadChildrenProperties(INode $node, $requestedProperties) {
 		// note: pre-fetching only supported for depth <= 1
-		if (!($node instanceof Directory)){
+		if (!($node instanceof Directory)) {
 			return;
 		}
 
 		$fileId = $node->getId();
-		if (!is_null($this->offsetGet($fileId))) {
+		if (null !== $this->offsetGet($fileId)) {
 			// we already loaded them at some point
 			return;
 		}
@@ -206,7 +205,7 @@ class FileCustomPropertiesBackend extends AbstractCustomPropertiesBackend {
 		$sql = 'SELECT * FROM `*PREFIX*properties` WHERE `fileid` IN (?)';
 		$sql .= ' AND `propertyname` in (?) ORDER BY `propertyname`';
 
-		$fileIdChunks = $this->getChunks($childrenIds, count($requestedProperties));
+		$fileIdChunks = $this->getChunks($childrenIds, \count($requestedProperties));
 		$props = [];
 		foreach ($fileIdChunks as $chunk) {
 			$result = $this->connection->executeQuery(
@@ -226,7 +225,7 @@ class FileCustomPropertiesBackend extends AbstractCustomPropertiesBackend {
 	 * @param string $path
 	 * @return INode|null
 	 */
-	protected function getNodeForPath($path){
+	protected function getNodeForPath($path) {
 		$node = parent::getNodeForPath($path);
 		if (!$node instanceof Node) {
 			return null;
@@ -248,11 +247,10 @@ class FileCustomPropertiesBackend extends AbstractCustomPropertiesBackend {
 		$databasePlatform = $this->connection->getDatabasePlatform();
 		if ($databasePlatform instanceof OraclePlatform || $databasePlatform instanceof SqlitePlatform) {
 			$slicer = 999 - $otherPlaceholdersCount;
-			$slices = array_chunk($toSlice, $slicer);
+			$slices = \array_chunk($toSlice, $slicer);
 		} else {
-			$slices = count($toSlice) ? [ 0 => $toSlice] : [];
+			$slices = \count($toSlice) ? [ 0 => $toSlice] : [];
 		}
 		return $slices;
 	}
-
 }

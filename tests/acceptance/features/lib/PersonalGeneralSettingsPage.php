@@ -44,7 +44,7 @@ class PersonalGeneralSettingsPage extends OwncloudPage {
 
 	/**
 	 * @param string $language
-	 * 
+	 *
 	 * @return void
 	 */
 	public function changeLanguage($language) {
@@ -64,14 +64,14 @@ class PersonalGeneralSettingsPage extends OwncloudPage {
 		Session $session,
 		$timeout_msec = STANDARDUIWAITTIMEOUTMILLISEC
 	) {
-		$currentTime = microtime(true);
+		$currentTime = \microtime(true);
 		$end = $currentTime + ($timeout_msec / 1000);
 		while ($currentTime <= $end) {
-			if (!is_null($this->findById($this->personalProfilePanelId))) {
+			if (null !== $this->findById($this->personalProfilePanelId)) {
 				break;
 			}
-			usleep(STANDARDSLEEPTIMEMICROSEC);
-			$currentTime = microtime(true);
+			\usleep(STANDARDSLEEPTIMEMICROSEC);
+			$currentTime = \microtime(true);
 		}
 
 		if ($currentTime > $end) {
@@ -88,14 +88,14 @@ class PersonalGeneralSettingsPage extends OwncloudPage {
 	 * @param string $oldPassword
 	 * @param string $newPassword
 	 * @param Session $session
-	 * 
+	 *
 	 * @return void
 	 */
 	public function changePassword($oldPassword, $newPassword, Session $session) {
 		$this->fillField($this->newPasswordInputID, $newPassword);
 		$this->fillField($this->oldPasswordInputID, $oldPassword);
 		$changePasswordButton = $this->findById($this->changePasswordButtonID);
-		if (is_null($changePasswordButton)) {
+		if (null === $changePasswordButton) {
 			throw new ElementNotFoundException(
 				__METHOD__ .
 				" could not find element with id $this->changePasswordButtonID"
@@ -113,7 +113,7 @@ class PersonalGeneralSettingsPage extends OwncloudPage {
 	public function getWrongPasswordMessageText() {
 		$errorMessage = $this->findById($this->passwordErrorMessageID);
 		
-		if (is_null($errorMessage)) {
+		if (null === $errorMessage) {
 			throw new ElementNotFoundException(
 				__METHOD__ .
 				" could not find element with id $this->passwordErrorMessageID"

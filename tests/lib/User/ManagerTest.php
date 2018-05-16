@@ -76,7 +76,6 @@ class ManagerTest extends TestCase {
 		$this->assertEquals([$backend, $dummyDatabaseBackend], $this->manager->getBackends());
 	}
 
-
 	public function testUserExistsSingleBackendExists() {
 		$account = $this->createMock(Account::class);
 		$this->accountMapper->expects($this->once())->method('getByUid')->with('foo')->willReturn($account);
@@ -162,8 +161,8 @@ class ManagerTest extends TestCase {
 			->with('fo')->willReturn([$a0, $a1]);
 		$result = $this->manager->find('fo');
 		$this->assertCount(2, $result);
-		$this->assertEquals('foo', array_shift($result)->getUID());
-		$this->assertEquals('foob', array_shift($result)->getUID());
+		$this->assertEquals('foo', \array_shift($result)->getUID());
+		$this->assertEquals('foob', \array_shift($result)->getUID());
 	}
 
 	public function testSearch() {
@@ -175,8 +174,8 @@ class ManagerTest extends TestCase {
 			->with('user_id', 'fo')->willReturn([$a0, $a1]);
 		$result = $this->manager->search('fo');
 		$this->assertCount(2, $result);
-		$this->assertEquals('afoo', array_shift($result)->getUID());
-		$this->assertEquals('foo', array_shift($result)->getUID());
+		$this->assertEquals('afoo', \array_shift($result)->getUID());
+		$this->assertEquals('foo', \array_shift($result)->getUID());
 	}
 
 	public function testSearchLimitOffset() {
@@ -190,9 +189,9 @@ class ManagerTest extends TestCase {
 			->with('user_id', 'fo', 3, 1)->willReturn([$a0, $a1, $a2]);
 		$result = $this->manager->search('fo', 3, 1);
 		$this->assertCount(3, $result);
-		$this->assertEquals('foo1', array_shift($result)->getUID());
-		$this->assertEquals('foo2', array_shift($result)->getUID());
-		$this->assertEquals('foo3', array_shift($result)->getUID());
+		$this->assertEquals('foo1', \array_shift($result)->getUID());
+		$this->assertEquals('foo2', \array_shift($result)->getUID());
+		$this->assertEquals('foo3', \array_shift($result)->getUID());
 	}
 
 	public function testCountUsersNoBackend() {
@@ -286,7 +285,7 @@ class ManagerTest extends TestCase {
 
 		$users = [];
 		$this->manager->callForAllUsers($function, '', true);
-		$this->assertCount(count($usersBefore) + 3, $users, join(', ', $usersBefore) . " !== " . join(', ', $users));
+		$this->assertCount(\count($usersBefore) + 3, $users, \join(', ', $usersBefore) . " !== " . \join(', ', $users));
 
 		//cleanup
 		$user1->delete();
