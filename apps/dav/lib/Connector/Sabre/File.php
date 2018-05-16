@@ -240,8 +240,10 @@ class File extends Node implements IFile, IFileNode {
 				$mtime = $this->sanitizeMtime($this->request->server ['HTTP_X_OC_MTIME']);
 				if ($this->fileView->touch($this->path, $mtime)) {
 					// touch propagates the update using view -> basicOperation -> writeUpdate
-					// No additional updater propagation required
-					$updatePropagated = true;
+					// No additional updater propagation required if that is enabled
+					if ($this->fileView->isCacheUpdateEnabled()) {
+						$updatePropagated = true;
+					}
 					$this->header('X-OC-MTime: accepted');
 				}
 			}
